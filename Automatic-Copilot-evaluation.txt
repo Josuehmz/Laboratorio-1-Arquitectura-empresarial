@@ -1,0 +1,215 @@
+===========================================================================
+  AUTOMATIC COPILOT EVALUATION – TA GRADING REPORT
+  Course: Digital Transformation and Enterprise Architecture
+  Topic:  Stellar Luminosity – Linear and Polynomial Regression
+===========================================================================
+
+---------------------------------------------------------------------------
+SUMMARY
+---------------------------------------------------------------------------
+This submission demonstrates a solid and well-organized implementation of
+linear and polynomial regression from first principles. Both notebooks
+cover all mandatory and recommended items: dataset definition, hypothesis
+and loss function, analytical gradient derivation, non-vectorized and
+vectorized gradient descent, cost surface visualization, learning-rate
+experiments, feature engineering, model comparison (M1/M2/M3), interaction
+cost analysis, and an inference example. The README provides detailed AWS
+SageMaker execution evidence with multiple screenshots. The main technical
+concern is that the inference cell in Notebook 2 applies the trained
+weights (learned on normalized features) directly to raw, un-normalized
+inputs, which would yield an incorrect prediction. Several markdown cells
+also contain unfilled placeholder values ("X.XX"), suggesting the
+documentation was not fully updated after execution.
+
+---------------------------------------------------------------------------
+GRADING BREAKDOWN (0.0 – 5.0 scale)
+---------------------------------------------------------------------------
+
+1. Repository Structure & Compliance ............................ 0.5 / 0.5
+   - README.md present and detailed: YES
+   - Two notebooks covering Part I and Part II: YES
+     (01_part1_linreg_1feature.ipynb, 02_part2_polyreg.ipynb)
+   - Datasets defined entirely inside notebooks (NumPy arrays): YES
+   - Only allowed libraries used (numpy, matplotlib,
+     mpl_toolkits.mplot3d): YES
+   Deductions: None.
+
+2. Notebook 1 – Linear Regression (One Feature) ................. 1.9 / 2.0
+   - Dataset visualization (scatter + comments on non-linearity): YES
+   - Hypothesis (L_hat = w*M + b) and MSE implementation: YES
+   - Cost surface: 3-D surface + contour plot + explanation [MANDATORY]: YES
+   - Analytical gradient derivation shown in LaTeX markdown: YES
+   - Gradient descent – non-vectorized (explicit loop): YES
+   - Gradient descent – vectorized (NumPy operations): YES
+   - Convergence plot on log scale + textual discussion [MANDATORY]: YES
+   - Learning-rate experiments with 3 values
+     (lr=0.001, 0.01, 0.1) [MANDATORY]: YES
+   - Final fit plot with per-point error lines: YES
+   - Error discussion (systematic under/over-estimation explained): YES
+   - Conceptual understanding of w (astro interpretation): YES
+   - Limits of linearity discussed: YES
+   Deductions:
+   - (-0.1) Final fit visualization does not include a dedicated residual
+     plot (error bar or residual subplot); error lines on the main plot and
+     text discussion are present but a formal residual analysis would
+     strengthen the evaluation.
+
+3. Notebook 2 – Polynomial Regression (Two Features) ............ 1.7 / 2.0
+   - Visualization with temperature color encoding: YES
+   - Feature engineering [M, T, M², M·T]: YES
+   - Normalization (z-score) implemented and applied during training: YES
+   - Vectorized loss and gradients: YES
+   - Training and convergence plot for all three models: YES
+   - M1/M2/M3 feature-selection experiment [MANDATORY]: YES
+   - Interaction cost analysis (w_MT sweep) [MANDATORY]: YES
+   - Inference example with code and written interpretation [MANDATORY]: YES
+   Deductions:
+   - (-0.2) Critical bug in the inference cell (Cell 27): the new
+     star's features are fed raw (un-normalized) into the model, but the
+     learned weights w_M3 correspond to the normalized feature space.
+     Correct inference requires applying the same z-score normalization
+     (using mean_M3 / std_M3 from training) before calling predict().
+     This produces an incorrect luminosity estimate at runtime.
+   - (-0.1) Several markdown cells retain unfilled placeholder values
+     ("L ≈ X.XX L⊙", "~X.XX" in the comparison table), indicating the
+     documentation was not fully updated after the notebook was executed.
+
+4. Cloud Execution Evidence (SageMaker) .......................... 0.5 / 0.5
+   - Step-by-step description of SageMaker deployment: YES
+   - Screenshots of SageMaker domain and Code Editor: YES
+   - Screenshots showing notebooks loaded in SageMaker: YES
+   - Screenshots of successful execution: YES
+   - Screenshots showing at least one plot output: YES
+     (GraficaData.png, Costo.png, GrafCost.png, end01.png,
+      image01-04.png, end02.png)
+   - Local vs. cloud comparison paragraph: YES
+   Deductions: None.
+
+---------------------------------------------------------------------------
+FINAL GRADE
+---------------------------------------------------------------------------
+  Repository structure & compliance :  0.5 / 0.5
+  Notebook 1 – Linear regression    :  1.9 / 2.0
+  Notebook 2 – Polynomial regression:  1.7 / 2.0
+  Cloud execution evidence           :  0.5 / 0.5
+                                       ----------
+  Final grade: 4.6 / 5.0   [PASS]
+
+---------------------------------------------------------------------------
+STRENGTHS
+---------------------------------------------------------------------------
+- Complete coverage of all mandatory items (cost surface, convergence plot,
+  ≥3 learning-rate experiments, M1/M2/M3 comparison, w_MT sweep, inference).
+- Well-structured, thoroughly commented code with clear docstrings on every
+  function.
+- Analytical gradient derivation presented in LaTeX, demonstrating
+  mathematical understanding before coding.
+- Both vectorized and non-vectorized implementations are correct and are
+  verified against each other in a sanity-check cell.
+- Normalization step correctly identified as necessary and properly
+  implemented for training; the issue is limited to the inference stage.
+- The SageMaker evidence is unusually thorough: many screenshots cover
+  each major step from the domain panel through plot outputs in both
+  notebooks.
+- Conceptual discussion of astro-physical meaning of w and limits of
+  linear models is accurate and appropriately detailed.
+- Interaction cost analysis (w_MT sweep around optimum) is implemented
+  correctly and interpreted well.
+
+---------------------------------------------------------------------------
+ISSUES & MISSING ELEMENTS
+---------------------------------------------------------------------------
+- [Notebook 2 – Critical] Inference does not apply normalization to the
+  new input before prediction. Line:
+      X_new = build_features(np.array([M_new]), np.array([T_new]), ...)
+      L_pred_new = predict(X_new, w_M3, b_M3)[0]
+  Should normalize X_new using mean_M3 and std_M3 before calling predict().
+  Fix: X_new_norm = (X_new - mean_M3) / std_M3; then predict(X_new_norm, ...).
+
+- [Notebook 2 – Minor] The model-comparison summary table (Cell 21) and
+  the inference interpretation cell (Cell 29) contain "~X.XX" and "X.XX"
+  placeholders that were never replaced with actual computed values.
+
+- [Notebook 1 – Minor] No dedicated residual/error subplot. The per-point
+  error lines are helpful, but a bar chart or scatter of residuals vs. M
+  would make the systematic bias more explicit.
+
+- [Notebook 2 – Minor] The w_MT sweep range covers only ±0.01 around the
+  trained optimal value, which may not illustrate the sensitivity of the
+  cost to this parameter convincingly. A wider range would better
+  demonstrate the parabolic shape of the cost curve.
+
+---------------------------------------------------------------------------
+TA FEEDBACK TO STUDENT
+---------------------------------------------------------------------------
+Great work overall. Your submission covers all required components and shows
+strong mathematical and programming understanding. The most important issue
+to fix is the normalization in the inference step of Notebook 2: the model
+was trained on z-score normalized features, so any new input must go
+through exactly the same transformation (using the training-set mean and
+std, not recomputed from scratch) before being multiplied by the learned
+weights. Without this step, the prediction output is not meaningful.
+
+For Notebook 1, consider adding a dedicated residuals plot (residual vs. M
+or a bar chart of errors) to make the systematic bias pattern visually
+clearer, complementing your already good textual analysis.
+
+For the documentation, make sure to re-run all markdown cells after
+executing the code so that any placeholder values ("X.XX") are replaced
+with the actual numbers. TA review focuses on substance, but unfilled
+placeholders in interpretation cells suggest the analysis loop was
+incomplete.
+
+The SageMaker evidence is exemplary in detail. The local vs. cloud
+comparison is concise and accurate.
+
+===========================================================================
+AI-GENERATION ASSESSMENT  (INFORMATIONAL ONLY – DOES NOT AFFECT GRADE)
+===========================================================================
+
+A. Qualitative Assessment
+--------------------------
+Indicators consistent with AI assistance:
+  - Extremely uniform code style and docstring format across all functions
+    in both notebooks.
+  - Explanations follow a textbook-like structure with consistent heading
+    hierarchy and bullet-point breakdown, rarely deviating in tone.
+  - Technical commentary (e.g., cost-surface explanation, convergence
+    analysis) uses complete, polished sentences with little variation in
+    depth or vocabulary—typical of generated prose.
+  - Placeholder values ("X.XX") in Markdown cells suggest the narrative
+    text was written before execution as a template, which is a common
+    AI-assisted workflow pattern.
+  - The README mirrors the notebook structure almost verbatim, suggesting
+    both were produced in the same session from a shared template.
+
+Indicators consistent with student involvement:
+  - The normalization bug in the inference cell is an organic oversight
+    that a fully AI-generated solution would typically avoid.
+  - The choice of learning rates (0.001, 0.01, 0.1) and the specific
+    w_MT sweep range are plausible student decisions.
+  - The SageMaker screenshots are real execution artifacts that required
+    manual steps.
+  - The mention of a specific w ≈ 15.5 in the conceptual section suggests
+    the student ran the notebook and read the output.
+
+B. Quantitative Estimate
+--------------------------
+  Code:                 ~65% AI-assisted
+  Explanations/markdown: ~75% AI-assisted
+  README:               ~70% AI-assisted
+
+C. Commentary
+--------------
+The codebase is clean, well-structured, and essentially correct, with a
+style and uniformity that suggest significant AI tool assistance in both
+drafting and polishing. The explanatory prose is notably consistent in
+tone and academic register, with few idiosyncratic or informal observations
+that would typically appear in student-written commentary. However, the
+presence of a normalization bug in the inference step, specific numeric
+references filled in from actual runs, and the real SageMaker screenshots
+indicate active student engagement with the material.
+
+This assessment is observational and does not imply misconduct.
+
+===========================================================================
